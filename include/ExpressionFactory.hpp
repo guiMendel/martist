@@ -23,6 +23,8 @@ struct Expression {
     DoubleExpressionFunction doubleFunction;
   };
 
+  Expression() = default;
+
   Expression(char representation, SingleExpressionFunction operation)
     : characterRepresentation(representation)
     , singleFunction(operation) {

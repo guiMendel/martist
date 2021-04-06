@@ -2,6 +2,8 @@
 #include "include/ExpressionTree.hpp"
 #include <time.h>
 
+#include <iostream>
+
 Martist::Martist(
   std::uint8_t* buffer,
   std::size_t width,
@@ -11,11 +13,10 @@ Martist::Martist(
   std::size_t blueDepth
 ) : buffer(buffer) {
   resize(width, height);
+  ExpressionTree::init({ 'x', 'y' });
   redTree = ExpressionTree(redDepth);
   greenTree = ExpressionTree(greenDepth);
   blueTree = ExpressionTree(blueDepth);
-  ExpressionTree::setVariables({ 'x', 'y' });
-  ExpressionTree::setSeed(time(NULL));
 }
 
 void Martist::resize(std::size_t width, std::size_t height) {
@@ -25,8 +26,11 @@ void Martist::resize(std::size_t width, std::size_t height) {
 }
 
 void Martist::paint() {
+  std::cout << "RED TREE" << std::endl;
   redTree.build();
+  std::cout << "GREEN TREE" << std::endl;
   greenTree.build();
+  std::cout << "BLUE TREE" << std::endl;
   blueTree.build();
 
   double redResult = redTree.plugVariables({ 0.5, -0.5 });

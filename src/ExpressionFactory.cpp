@@ -4,7 +4,7 @@
 #define PI 3.14159265
 
 double ExpressionFactory::sin(double input) {
-  return sin(PI * input);
+  return ::sin(PI * input);
 }
 
 double ExpressionFactory::cosin(double input) {

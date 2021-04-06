@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 #include <algorithm>
+#include <exception>
+#include <functional>
 #include <random>
 
 // Used when constructing nodes
@@ -13,64 +15,48 @@ struct WeightedMaker {
 };
 
 // local functions
-static double evaluateExpression(std::unique_ptr<ExpressionNode>&, std::vector<double>&);
-static double extractVariable(std::unique_ptr<ExpressionNode>&, std::vector<double>&);
+
+// Randomly selects one of the nodeMaker attributes from the struct in the vector, weighted by the struct's weight
 static ExpressionTree::nodeMaker randomWeightedMaker(std::vector<WeightedMaker>, std::default_random_engine&);
+// Simply returns a random index that is valid for the provided vector
+template <class T> static int randomIndex(std::vector<T>& container, std::default_random_engine& engine);
+
+void ExpressionTree::init(std::vector<char> variables, unsigned int seed) {
+  setVariables(variables);
+  setSeed(seed);
+  ExpressionFactory::populateExpressions(singleExpressions, doubleExpressions);
+  initialized = true;
+}
 
 void ExpressionTree::build() {
+  if (!initialized) throw std::logic_error("Class ExpressionTree must be initialized before any of it's instances are built");
   if (depth > 0) head = grow(depth - 1);
   else {
-    // Creates an expression that indicates to always return 0
-    head = std::make_unique<ExpressionNode>(Expression('0', -1));
+    // Creates a node that always evaluates to 0
+    head = std::make_unique<NullNode>();
   }
 }
 
 std::unique_ptr<ExpressionNode> ExpressionTree::grow(std::size_t remainingDepth) {
+  // DEBUG
+  std::cout << "Growing layer " << remainingDepth << std::endl;
   // If this is the bottom of the tree, always makes a leaf node
-  if (remainingDepth == 0) return makeLeafExpression();
-
-  // Gets random node maker, weighted by node type probabilities
+  if (remainingDepth == 0) return makeLeafExpression(remainingDepth);
+  // Gets random node maker, weighted by node type probabilities for current depth
   auto maker = randomWeightedMaker({
-    WeightedMaker(makeLeafExpression, leafLikelihood(remainingDepth)),
-    WeightedMaker(makeSingleExpression, singleBranchLikelihood(remainingDepth)),
-    WeightedMaker(makeDoubleExpression, doubleBranchLikelihood(remainingDepth))
+    WeightedMaker(&ExpressionTree::makeLeafExpression, leafLikelihood(remainingDepth)),
+    WeightedMaker(&ExpressionTree::makeSingleExpression, singleBranchLikelihood(remainingDepth)),
+    WeightedMaker(&ExpressionTree::makeDoubleExpression, doubleBranchLikelihood(remainingDepth))
     },
     randomEngine
   );
 
   // Calls the randomly selected maker and returns its resulting node
-  return maker();
-}
-
-std::unique_ptr<ExpressionNode> ExpressionTree::makeLeafExpression() {
-  std::cout << "In make leaf" << std::endl;
-  // Gets a random index for one of the available variables
-  std::uniform_int_distribution<int> randomIndex(0, variables.size() - 1);
-  int variableIndex = randomIndex(randomEngine);
-
-  return std::make_unique<ExpressionNode>(Expression(variables[variableIndex], variableIndex));
-}
-
-std::unique_ptr<ExpressionNode> ExpressionTree::makeSingleExpression() {
-  std::cout << "In make single" << std::endl;
-  // Gets a random index for one of the available variables
-  std::uniform_int_distribution<int> randomIndex(0, variables.size() - 1);
-  int variableIndex = randomIndex(randomEngine);
-
-  return std::make_unique<ExpressionNode>(Expression(variables[variableIndex], variableIndex));
-}
-
-std::unique_ptr<ExpressionNode> ExpressionTree::makeDoubleExpression() {
-  std::cout << "In make double" << std::endl;
-  // Gets a random index for one of the available variables
-  std::uniform_int_distribution<int> randomIndex(0, variables.size() - 1);
-  int variableIndex = randomIndex(randomEngine);
-
-  return std::make_unique<ExpressionNode>(Expression(variables[variableIndex], variableIndex));
+  return (this->*maker)(remainingDepth);
 }
 
 double ExpressionTree::plugVariables(std::vector<double> variables) {
-  return evaluateExpression(head, variables);
+  return head->evaluate(variables);
 }
 
 bool ExpressionTree::likelihood(double chance) {
@@ -80,18 +66,27 @@ bool ExpressionTree::likelihood(double chance) {
   return continuousCoin(randomEngine) < chance;
 }
 
-static double evaluateExpression(std::unique_ptr<ExpressionNode>& expressionNode, std::vector<double>& variables) {
-  // If this expression has no children, we can evaluate it now
-  if (expressionNode->children.size() == 0) return extractVariable(expressionNode, variables);
-  printf("No variable to extract here!\n");
-  return extractVariable(expressionNode, variables);
+//////////////////////////////// NODE INITIALIZERS
+
+LeafNode::LeafNode(std::vector<char>& variableRepresentations, std::default_random_engine& engine) {
+  // Grabs a random index from the vector
+  int variableIndex = randomIndex<char>(variableRepresentations, engine);
+  expression = Expression(variableRepresentations[variableIndex], variableIndex);
 }
 
-static double extractVariable(std::unique_ptr<ExpressionNode>& expressionNode, std::vector<double>& variables) {
-  int variableIndex = expressionNode->expression.variableIndex;
-  // If index is -1, should always return 0
-  return variableIndex >= 0 ? variables[variableIndex] : 0.0;
+SingleNode::SingleNode(std::vector<Expression>& availableExpressions, std::default_random_engine& engine,
+  std::unique_ptr<ExpressionNode> child
+) : child(child.release()) {
+  expression = availableExpressions[randomIndex<Expression>(availableExpressions, engine)];
 }
+
+DoubleNode::DoubleNode(std::vector<Expression>& availableExpressions, std::default_random_engine& engine,
+  std::unique_ptr<ExpressionNode> child1, std::unique_ptr<ExpressionNode> child2
+) : child1(child1.release()), child2(child2.release()) {
+  expression = availableExpressions[randomIndex<Expression>(availableExpressions, engine)];
+}
+
+/////////////////////////////// LOCAL FUNCTIONS
 
 static ExpressionTree::nodeMaker randomWeightedMaker(std::vector<WeightedMaker> makers, std::default_random_engine& engine) {
   // Gets total sum of weights
@@ -100,7 +95,7 @@ static ExpressionTree::nodeMaker randomWeightedMaker(std::vector<WeightedMaker> 
 
   // Sorts makers based on weight
   sort(makers.begin(), makers.end(),
-    [](WeightedMaker maker1, WeightedMaker maker2) { return maker1.weight >= maker2.weight; }
+    [](WeightedMaker& maker1, WeightedMaker& maker2) { return maker1.weight >= maker2.weight; }
   );
 
   // Gets random value in [0, totalWeight) range
@@ -113,4 +108,10 @@ static ExpressionTree::nodeMaker randomWeightedMaker(std::vector<WeightedMaker> 
 
   // Returns selected maker
   return makerIterator->maker;
+}
+
+template <class T> static int randomIndex(std::vector<T>& container, std::default_random_engine& engine) {
+  // Gets a random index
+  std::uniform_int_distribution<int> index(0, container.size() - 1);
+  return index(engine);
 }
