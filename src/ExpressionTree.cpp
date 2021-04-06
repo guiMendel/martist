@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 #include <algorithm>
-#include <exception>
 #include <functional>
 #include <random>
 
@@ -25,11 +24,11 @@ void ExpressionTree::init(std::vector<char> variables, unsigned int seed) {
   setVariables(variables);
   setSeed(seed);
   ExpressionFactory::populateExpressions(singleExpressions, doubleExpressions);
-  initialized = true;
 }
 
+//////////////////////////////// TREE BUILDING
+
 void ExpressionTree::build() {
-  if (!initialized) throw std::logic_error("Class ExpressionTree must be initialized before any of it's instances are built");
   if (depth > 0) head = grow(depth - 1);
   else {
     // Creates a node that always evaluates to 0
@@ -55,9 +54,19 @@ std::unique_ptr<ExpressionNode> ExpressionTree::grow(std::size_t remainingDepth)
   return (this->*maker)(remainingDepth);
 }
 
+/////////////////////////////// TREE EVALUATING
+
 double ExpressionTree::plugVariables(std::vector<double> variables) {
   return head->evaluate(variables);
 }
+
+std::ostream& operator<<(std::ostream& out, const ExpressionTree& tree) {
+  out << tree.head->toString();
+
+  return out;
+}
+
+/////////////////////////////// PROBABILITY STUFF
 
 bool ExpressionTree::likelihood(double chance) {
   // Gets a random number between 0 and 100

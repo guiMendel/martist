@@ -39,3 +39,9 @@ void Martist::paint() {
 
   printf("Red: %.2f, Green: %.2f, Blue: %.2f\n", redResult, greenResult, blueResult);
 }
+
+std::ostream& operator<<(std::ostream& out, const Martist& martist) {
+  out << martist.redTree << '\n' << martist.greenTree << '\n' << martist.blueTree << '\n';
+
+  return out;
+}

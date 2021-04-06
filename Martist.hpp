@@ -7,6 +7,8 @@
 
 class Martist {
 public:
+  friend std::ostream& operator<<(std::ostream& out, const Martist& martist);
+
   Martist(std::uint8_t* buffer, std::size_t width,
     std::size_t height, std::size_t redDepth,
     std::size_t greenDepth, std::size_t blueDepth);
@@ -68,5 +70,10 @@ private:
   // The blue channel expression tree
   ExpressionTree blueTree;
 };
+
+
+// Write last painted image spec to a stream. Writing a martist that has not yet been painted is undefined.
+std::ostream& operator<<(std::ostream& out, const Martist& martist);
+
 
 #endif

@@ -18,16 +18,23 @@ struct ExpressionNode {
 
   // Returns the result of evaluating this expression over the provided variables
   virtual double evaluate(std::vector<double>& variables) = 0;
+
+  // Returns this node's expression written in reverse polish notation
+  virtual std::string toString() = 0;
 };
 
 struct NullNode : ExpressionNode {
   virtual double evaluate(std::vector<double>&) { return 0; }
+
+  virtual std::string toString() { return "0"; }
 };
 
 struct LeafNode : ExpressionNode {
   LeafNode(std::vector<char>& variableRepresentations, std::default_random_engine& engine);
 
   virtual double evaluate(std::vector<double>& variables) { return variables[expression.variableIndex]; }
+
+  virtual std::string toString() { return std::string({ expression.characterRepresentation }); }
 };
 
 struct SingleNode : ExpressionNode {
@@ -37,6 +44,8 @@ struct SingleNode : ExpressionNode {
     std::unique_ptr<ExpressionNode> child);
 
   virtual double evaluate(std::vector<double>& variables) { return expression.singleFunction(child->evaluate(variables)); }
+
+  virtual std::string toString() { return child->toString() + expression.characterRepresentation; }
 };
 
 struct DoubleNode : ExpressionNode {
@@ -49,10 +58,14 @@ struct DoubleNode : ExpressionNode {
   virtual double evaluate(std::vector<double>& variables) {
     return expression.doubleFunction(child1->evaluate(variables), child2->evaluate(variables));
   }
+
+  virtual std::string toString() { return child1->toString() + child2->toString() + expression.characterRepresentation; }
 };
 
 class ExpressionTree {
 public:
+  friend std::ostream& operator<<(std::ostream&, const ExpressionTree&);
+
   ExpressionTree() = default;
   ExpressionTree(std::size_t depth) : depth(depth) {}
 
@@ -116,9 +129,6 @@ private:
   // The tree's depth
   std::size_t depth;
 
-  // Indicates whether the class has been initialized
-  inline static bool initialized = false;
-
   // All the trees' variable representations
   inline static std::vector<char> variables;
 
@@ -146,5 +156,9 @@ private:
 public:
   typedef decltype(&ExpressionTree::makeLeafExpression) nodeMaker;
 };
+
+// Write currently built spec to a stream. Writing before building is undefined.
+std::ostream& operator<<(std::ostream& out, const ExpressionTree& tree);
+
 
 #endif
