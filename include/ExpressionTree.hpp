@@ -97,19 +97,19 @@ private:
 
   // Makes a leaf node expression
   std::unique_ptr<ExpressionNode> makeLeafExpression(std::size_t) {
-    std::cout << "-> makeLeafExpression" << std::endl;
+    // std::cout << "-> makeLeafExpression" << std::endl;
     return std::make_unique<LeafNode>(variables, randomEngine);
   }
 
   // Makes a single branch node expression
   std::unique_ptr<ExpressionNode> makeSingleExpression(std::size_t remainingDepth) {
-    std::cout << "-> makeSingleExpression" << std::endl;
+    // std::cout << "-> makeSingleExpression" << std::endl;
     return std::make_unique<SingleNode>(singleExpressions, randomEngine, grow(remainingDepth - 1));
   }
 
   // Makes a double branch node expression
   std::unique_ptr<ExpressionNode> makeDoubleExpression(std::size_t remainingDepth) {
-    std::cout << "-> makeDoubleExpression" << std::endl;
+    // std::cout << "-> makeDoubleExpression" << std::endl;
     return std::make_unique<DoubleNode>(doubleExpressions, randomEngine, grow(remainingDepth - 1), grow(remainingDepth - 1));
   }
 

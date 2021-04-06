@@ -4,6 +4,11 @@
 
 #include <iostream>
 
+// local functions
+
+// Converts from -1,1 range to 0,255 range
+static std::uint8_t convertFromRange(double number);
+
 Martist::Martist(
   std::uint8_t* buffer,
   std::size_t width,
@@ -26,22 +31,33 @@ void Martist::resize(std::size_t width, std::size_t height) {
 }
 
 void Martist::paint() {
-  std::cout << "RED TREE" << std::endl;
+  // DEBUG
+  // std::cout << "RED TREE" << std::endl;
   redTree.build();
-  std::cout << "GREEN TREE" << std::endl;
+  // std::cout << "GREEN TREE" << std::endl;
   greenTree.build();
-  std::cout << "BLUE TREE" << std::endl;
+  // std::cout << "BLUE TREE" << std::endl;
   blueTree.build();
 
-  double redResult = redTree.plugVariables({ 0.5, -0.5 });
-  double greenResult = greenTree.plugVariables({ 0.5, -0.5 });
-  double blueResult = blueTree.plugVariables({ 0.5, -0.5 });
+  auto bufferIterator = buffer;
 
-  printf("Red: %.2f, Green: %.2f, Blue: %.2f\n", redResult, greenResult, blueResult);
+  // Steps throgh each pixel of the image. Does calculation to have the -1,1 range representation of this pixel's position
+  // First pixel position is halfUnit - 1
+  for (double xPosition = halfUnitX - 1; xPosition < 1.0; xPosition += 2 * halfUnitX) {
+    for (double yPosition = halfUnitY - 1; yPosition < 1.0; yPosition += 2 * halfUnitY) {
+      *bufferIterator++ = convertFromRange(redTree.plugVariables({ xPosition, yPosition }));
+      *bufferIterator++ = convertFromRange(greenTree.plugVariables({ xPosition, yPosition }));
+      *bufferIterator++ = convertFromRange(blueTree.plugVariables({ xPosition, yPosition }));
+    }
+  }
 }
 
 std::ostream& operator<<(std::ostream& out, const Martist& martist) {
   out << martist.redTree << '\n' << martist.greenTree << '\n' << martist.blueTree << '\n';
 
   return out;
+}
+
+static std::uint8_t convertFromRange(double number) {
+  return (std::uint8_t)((number + 1.0) * 127.5);
 }

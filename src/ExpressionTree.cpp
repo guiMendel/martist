@@ -38,7 +38,7 @@ void ExpressionTree::build() {
 
 std::unique_ptr<ExpressionNode> ExpressionTree::grow(std::size_t remainingDepth) {
   // DEBUG
-  std::cout << "Growing layer " << remainingDepth << std::endl;
+  // std::cout << "Growing layer " << remainingDepth << std::endl;
   // If this is the bottom of the tree, always makes a leaf node
   if (remainingDepth == 0) return makeLeafExpression(remainingDepth);
   // Gets random node maker, weighted by node type probabilities for current depth
