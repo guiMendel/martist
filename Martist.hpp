@@ -8,6 +8,7 @@
 class Martist {
 public:
   friend std::ostream& operator<<(std::ostream& out, const Martist& martist);
+  friend std::istream& operator>>(std::istream& out, const Martist& martist);
 
   Martist(std::uint8_t* buffer, std::size_t width,
     std::size_t height, std::size_t redDepth,
@@ -75,5 +76,7 @@ private:
 // Write last painted image spec to a stream. Writing a martist that has not yet been painted is undefined.
 std::ostream& operator<<(std::ostream& out, const Martist& martist);
 
+// Read spec. Instantly paints this spec.
+std::istream& operator>>(std::istream& in, const Martist& martist);
 
 #endif

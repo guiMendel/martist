@@ -160,5 +160,6 @@ public:
 // Write currently built spec to a stream. Writing before building is undefined.
 std::ostream& operator<<(std::ostream& out, const ExpressionTree& tree);
 
+std::istream& operator>>(std::istream& in, const ExpressionTree& tree);
 
 #endif

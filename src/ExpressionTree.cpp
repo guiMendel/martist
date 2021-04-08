@@ -66,6 +66,25 @@ std::ostream& operator<<(std::ostream& out, const ExpressionTree& tree) {
   return out;
 }
 
+std::istream& operator>>(std::istream& in, const ExpressionTree& tree) {
+  char expression;
+
+  // Discard empty spaces
+  while (in.get(expression) && isspace(expression));
+
+  // If there's still content left
+  if (in) {
+    do {
+      std::cout << expression << std::endl;
+    } while (in.get(expression) && !isspace(expression));
+
+    // If read a whitespace, puts it back in
+    if (in) in.unget();
+  }
+
+  return in;
+}
+
 /////////////////////////////// PROBABILITY STUFF
 
 bool ExpressionTree::likelihood(double chance) {

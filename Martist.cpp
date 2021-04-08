@@ -58,6 +58,12 @@ std::ostream& operator<<(std::ostream& out, const Martist& martist) {
   return out;
 }
 
+std::istream& operator>>(std::istream& in, const Martist& martist) {
+  in >> martist.redTree >> martist.greenTree >> martist.blueTree;
+
+  return in;
+}
+
 static std::uint8_t convertFromRange(double number) {
   return (std::uint8_t)((number + 1.0) * 127.5);
 }
