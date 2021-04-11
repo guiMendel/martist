@@ -1,5 +1,6 @@
 #include "../include/ExpressionTree.hpp"
 #include "../include/ExpressionFactory.hpp"
+#include "../include/SpecReader.hpp"
 #include <memory>
 #include <vector>
 #include <algorithm>
@@ -56,7 +57,7 @@ std::unique_ptr<ExpressionNode> ExpressionTree::grow(std::size_t remainingDepth)
 
 /////////////////////////////// TREE EVALUATING
 
-double ExpressionTree::plugVariables(std::vector<double> variables) {
+double ExpressionTree::plugVariables(std::vector<double> variables) const {
   return head->evaluate(variables);
 }
 
@@ -66,7 +67,7 @@ std::ostream& operator<<(std::ostream& out, const ExpressionTree& tree) {
   return out;
 }
 
-std::istream& operator>>(std::istream& in, const ExpressionTree& tree) {
+std::istream& operator>>(std::istream& in, ExpressionTree& tree) {
   char expression;
 
   // Discard empty spaces
@@ -74,12 +75,23 @@ std::istream& operator>>(std::istream& in, const ExpressionTree& tree) {
 
   // If there's still content left
   if (in) {
+    // Structure that builds the tree from the characters read
+    SpecReader reader;
+
     do {
-      std::cout << expression << std::endl;
+      // std::cout << expression << std::endl;
+      reader.read(expression);
     } while (in.get(expression) && !isspace(expression));
 
     // If read a whitespace, puts it back in
     if (in) in.unget();
+
+    // Updates the tree to read spec
+    tree.head = reader.assembleTree();
+  }
+  else {
+    // If spec is empty, so shall be the tree
+    tree.head = std::make_unique<NullNode>();
   }
 
   return in;

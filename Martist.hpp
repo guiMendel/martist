@@ -8,7 +8,7 @@
 class Martist {
 public:
   friend std::ostream& operator<<(std::ostream& out, const Martist& martist);
-  friend std::istream& operator>>(std::istream& out, const Martist& martist);
+  friend std::istream& operator>>(std::istream& out, Martist& martist);
 
   Martist(std::uint8_t* buffer, std::size_t width,
     std::size_t height, std::size_t redDepth,
@@ -53,6 +53,9 @@ public:
   }
 
 private:
+  // Renders the image
+  void render() const;
+
   // Sets halfUnitX and halfUnitY in respect to the provided width and height
   void resize(std::size_t width, std::size_t height);
 
@@ -77,6 +80,6 @@ private:
 std::ostream& operator<<(std::ostream& out, const Martist& martist);
 
 // Read spec. Instantly paints this spec.
-std::istream& operator>>(std::istream& in, const Martist& martist);
+std::istream& operator>>(std::istream& in, Martist& martist);
 
 #endif

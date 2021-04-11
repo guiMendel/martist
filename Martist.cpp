@@ -39,6 +39,10 @@ void Martist::paint() {
   // std::cout << "BLUE TREE" << std::endl;
   blueTree.build();
 
+  render();
+}
+
+void Martist::render() const {
   auto bufferIterator = buffer;
 
   // Steps throgh each pixel of the image. Does calculation to have the -1,1 range representation of this pixel's position
@@ -58,8 +62,10 @@ std::ostream& operator<<(std::ostream& out, const Martist& martist) {
   return out;
 }
 
-std::istream& operator>>(std::istream& in, const Martist& martist) {
+std::istream& operator>>(std::istream& in, Martist& martist) {
   in >> martist.redTree >> martist.greenTree >> martist.blueTree;
+
+  martist.render();
 
   return in;
 }

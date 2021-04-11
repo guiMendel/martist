@@ -17,14 +17,14 @@ struct ExpressionNode {
   ExpressionNode() = default;
 
   // Returns the result of evaluating this expression over the provided variables
-  virtual double evaluate(std::vector<double>& variables) = 0;
+  virtual double evaluate(std::vector<double>& variables) const = 0;
 
   // Returns this node's expression written in reverse polish notation
   virtual std::string toString() = 0;
 };
 
 struct NullNode : ExpressionNode {
-  virtual double evaluate(std::vector<double>&) { return 0; }
+  virtual double evaluate(std::vector<double>&) const { return 0; }
 
   virtual std::string toString() { return "0"; }
 };
@@ -32,7 +32,7 @@ struct NullNode : ExpressionNode {
 struct LeafNode : ExpressionNode {
   LeafNode(std::vector<char>& variableRepresentations, std::default_random_engine& engine);
 
-  virtual double evaluate(std::vector<double>& variables) { return variables[expression.variableIndex]; }
+  virtual double evaluate(std::vector<double>& variables) const { return variables[expression.variableIndex]; }
 
   virtual std::string toString() { return std::string({ expression.characterRepresentation }); }
 };
@@ -43,7 +43,7 @@ struct SingleNode : ExpressionNode {
   SingleNode(std::vector<Expression>& availableExpressions, std::default_random_engine& engine,
     std::unique_ptr<ExpressionNode> child);
 
-  virtual double evaluate(std::vector<double>& variables) { return expression.singleFunction(child->evaluate(variables)); }
+  virtual double evaluate(std::vector<double>& variables) const { return expression.singleFunction(child->evaluate(variables)); }
 
   virtual std::string toString() { return child->toString() + expression.characterRepresentation; }
 };
@@ -55,7 +55,7 @@ struct DoubleNode : ExpressionNode {
   DoubleNode(std::vector<Expression>& availableExpressions, std::default_random_engine& engine,
     std::unique_ptr<ExpressionNode> child1, std::unique_ptr<ExpressionNode> child2);
 
-  virtual double evaluate(std::vector<double>& variables) {
+  virtual double evaluate(std::vector<double>& variables) const {
     return expression.doubleFunction(child1->evaluate(variables), child2->evaluate(variables));
   }
 
@@ -65,6 +65,7 @@ struct DoubleNode : ExpressionNode {
 class ExpressionTree {
 public:
   friend std::ostream& operator<<(std::ostream&, const ExpressionTree&);
+  friend std::istream& operator>>(std::istream&, ExpressionTree&);
 
   ExpressionTree() = default;
   ExpressionTree(std::size_t depth) : depth(depth) {}
@@ -87,7 +88,7 @@ public:
   void build();
 
   // Performs the tree's expressions on the provided variables
-  double plugVariables(std::vector<double> variables);
+  double plugVariables(std::vector<double> variables) const;
 
 private:
   // Recursively builds a node and its children
