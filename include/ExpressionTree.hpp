@@ -7,6 +7,7 @@
 #include <memory>
 #include <functional>
 #include "./ExpressionFactory.hpp"
+// #include "./SpecReader.hpp"
 
 #include <iostream>
 
@@ -32,6 +33,9 @@ struct NullNode : ExpressionNode {
 struct LeafNode : ExpressionNode {
   LeafNode(std::vector<char>& variableRepresentations, std::default_random_engine& engine);
 
+  // Used when reading a spec
+  LeafNode(int index, char representation) { expression.variableIndex = index; expression.characterRepresentation = representation; }
+
   virtual double evaluate(std::vector<double>& variables) const { return variables[expression.variableIndex]; }
 
   virtual std::string toString() { return std::string({ expression.characterRepresentation }); }
@@ -42,6 +46,9 @@ struct SingleNode : ExpressionNode {
 
   SingleNode(std::vector<Expression>& availableExpressions, std::default_random_engine& engine,
     std::unique_ptr<ExpressionNode> child);
+
+  // Used when reading a spec
+  SingleNode(Expression _expression, std::unique_ptr<ExpressionNode> child) : child(child.release()) { expression = _expression; }
 
   virtual double evaluate(std::vector<double>& variables) const { return expression.singleFunction(child->evaluate(variables)); }
 
@@ -55,6 +62,10 @@ struct DoubleNode : ExpressionNode {
   DoubleNode(std::vector<Expression>& availableExpressions, std::default_random_engine& engine,
     std::unique_ptr<ExpressionNode> child1, std::unique_ptr<ExpressionNode> child2);
 
+  // Used when reading a spec
+  DoubleNode(Expression _expression, std::unique_ptr<ExpressionNode> child1, std::unique_ptr<ExpressionNode> child2)
+    : child1(child1.release()), child2(child2.release()) { expression = _expression; }
+
   virtual double evaluate(std::vector<double>& variables) const {
     return expression.doubleFunction(child1->evaluate(variables), child2->evaluate(variables));
   }
@@ -66,6 +77,7 @@ class ExpressionTree {
 public:
   friend std::ostream& operator<<(std::ostream&, const ExpressionTree&);
   friend std::istream& operator>>(std::istream&, ExpressionTree&);
+  friend class SpecReader;
 
   ExpressionTree() = default;
   ExpressionTree(std::size_t depth) : depth(depth) {}

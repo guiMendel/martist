@@ -76,7 +76,7 @@ std::istream& operator>>(std::istream& in, ExpressionTree& tree) {
   // If there's still content left
   if (in) {
     // Structure that builds the tree from the characters read
-    SpecReader reader;
+    SpecReader reader(tree);
 
     do {
       // std::cout << expression << std::endl;
@@ -87,7 +87,7 @@ std::istream& operator>>(std::istream& in, ExpressionTree& tree) {
     if (in) in.unget();
 
     // Updates the tree to read spec
-    tree.head = reader.assembleTree();
+    tree.head.reset(reader.assembleTree());
   }
   else {
     // If spec is empty, so shall be the tree
