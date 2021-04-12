@@ -34,12 +34,13 @@ public:
   void read(char expression) {
     try { stackRecipeEntries.at(expression)(); }
     catch (std::out_of_range& error) {
+      std::cerr << "ERROR: No such expression '" << expression << "'" << std::endl;
       throw std::invalid_argument("No such expression " + expression);
     }
   };
 
   // Returns assembled tree and empties the stack
-  ExpressionNode* assembleTree() { stackHead->print(); auto tree = stackHead->node.release(); stackHead.reset(); return tree; }
+  ExpressionNode* assembleTree() { auto tree = stackHead->node.release(); stackHead.reset(); return tree; }
 
 private:
   // Passes through the tree's variables, single and double expressions and populates stackRecipeEntries
@@ -51,6 +52,12 @@ private:
 
   // Pops the head node
   std::unique_ptr<ExpressionNode> pop() {
+    // Makes sure stack not empty
+    if (!stackHead) {
+      std::cerr << "ERROR: Syntax error in the expressions" << std::endl;
+      throw std::invalid_argument("Bad expression syntax");
+    }
+
     // Take the head node
     std::unique_ptr<ExpressionNode> child(stackHead->node.release());
 
