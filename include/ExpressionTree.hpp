@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <time.h>
+#include <algorithm>
 #include <random>
 #include <memory>
 #include <functional>
@@ -22,12 +23,17 @@ struct ExpressionNode {
 
   // Returns this node's expression written in reverse polish notation
   virtual std::string toString() = 0;
+
+  // Returns the depth from this node down
+  virtual std::size_t currentDepth() = 0;
 };
 
 struct NullNode : ExpressionNode {
   virtual double evaluate(std::vector<double>&) const { return -1; }
 
   virtual std::string toString() { return "0"; }
+
+  virtual std::size_t currentDepth() { return 0; }
 };
 
 struct LeafNode : ExpressionNode {
@@ -39,6 +45,8 @@ struct LeafNode : ExpressionNode {
   virtual double evaluate(std::vector<double>& variables) const { return variables[expression.variableIndex]; }
 
   virtual std::string toString() { return std::string({ expression.characterRepresentation }); }
+
+  virtual std::size_t currentDepth() { return 1; }
 };
 
 struct SingleNode : ExpressionNode {
@@ -53,6 +61,8 @@ struct SingleNode : ExpressionNode {
   virtual double evaluate(std::vector<double>& variables) const { return expression.singleFunction(child->evaluate(variables)); }
 
   virtual std::string toString() { return child->toString() + expression.characterRepresentation; }
+
+  virtual std::size_t currentDepth() { return 1 + child->currentDepth(); }
 };
 
 struct DoubleNode : ExpressionNode {
@@ -73,6 +83,8 @@ struct DoubleNode : ExpressionNode {
   }
 
   virtual std::string toString() { return child1->toString() + child2->toString() + expression.characterRepresentation; }
+
+  virtual std::size_t currentDepth() { return 1 + std::max(child1->currentDepth(), child2->currentDepth()); }
 };
 
 class ExpressionTree {
@@ -107,6 +119,9 @@ public:
 private:
   // Recursively builds a node and its children
   std::unique_ptr<ExpressionNode> grow(std::size_t remainingDepth);
+
+  // Adjusts depth attribute to current tree depth
+  void adjustDepth() { setDepth(head->currentDepth()); }
 
   /////////// NODE MAKERS
 

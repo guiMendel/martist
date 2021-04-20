@@ -1,16 +1,18 @@
 #include "Martist.hpp"
-#include <iostream>
 #include <cassert>
+#include <sstream>
 int main() {
   constexpr std::size_t WIDTH = 320, HEIGHT = 240;
   std::uint8_t buf[WIDTH * HEIGHT * 3];
-  for (std::size_t i = 0; i < WIDTH * HEIGHT * 3; ++i)
-    buf[i] = i % 256; // Fill buf with mostly non-zero bytes
   Martist martist(buf, WIDTH, HEIGHT, 0, 0, 0);
-  martist.paint();
-  // buf should be filled black (i.e. zero-filled)
-  for (std::size_t i = 0; i < WIDTH * HEIGHT * 3; ++i) {
-    assert(buf[i] == 0);
-  }
+  std::string spec("ys\nyxaxcac\nyx*yxsyyaaxc*c*ayysy*sac*\n");
+  std::istringstream in(spec);
+  in >> martist;
+  assert(martist.redDepth() == 2);
+  assert(martist.greenDepth() == 4);
+  assert(martist.blueDepth() == 8);
+  std::ostringstream out;
+  out << martist;
+  assert(out.str() == spec);
   return 0;
 }

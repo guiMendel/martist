@@ -88,6 +88,9 @@ std::istream& operator>>(std::istream& in, ExpressionTree& tree) {
 
     // Updates the tree to read spec
     tree.head.reset(reader.assembleTree());
+
+    // Updates tree's depth
+    tree.adjustDepth();
   }
   else {
     // If spec is empty, so shall be the tree
