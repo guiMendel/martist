@@ -2,3 +2,6 @@
 *out.txt
 .vscode
 test*
+obj
+*.o
+martist
