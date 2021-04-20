@@ -51,8 +51,8 @@ void Martist::render() const {
 
   // Steps throgh each pixel of the image. Does calculation to have the -1,1 range representation of this pixel's position
   // First pixel position is halfUnit - 1
-  for (double xPosition = halfUnitX - 1; xPosition < 1.0; xPosition += 2 * halfUnitX) {
-    for (double yPosition = halfUnitY - 1; yPosition < 1.0; yPosition += 2 * halfUnitY) {
+  for (double yPosition = 1 - halfUnitY; yPosition > -1.0; yPosition -= 2 * halfUnitY) {
+    for (double xPosition = halfUnitX - 1; xPosition < 1.0; xPosition += 2 * halfUnitX) {
       *bufferIterator++ = convertFromRange(redTree.plugVariables({ xPosition, yPosition }));
       *bufferIterator++ = convertFromRange(greenTree.plugVariables({ xPosition, yPosition }));
       *bufferIterator++ = convertFromRange(blueTree.plugVariables({ xPosition, yPosition }));
