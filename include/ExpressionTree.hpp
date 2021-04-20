@@ -25,7 +25,7 @@ struct ExpressionNode {
 };
 
 struct NullNode : ExpressionNode {
-  virtual double evaluate(std::vector<double>&) const { return 0; }
+  virtual double evaluate(std::vector<double>&) const { return -1; }
 
   virtual std::string toString() { return "0"; }
 };
@@ -64,7 +64,9 @@ struct DoubleNode : ExpressionNode {
 
   // Used when reading a spec
   DoubleNode(Expression _expression, std::unique_ptr<ExpressionNode> child1, std::unique_ptr<ExpressionNode> child2)
-    : child1(child1.release()), child2(child2.release()) { expression = _expression; }
+    : child1(child1.release()), child2(child2.release()) {
+    expression = _expression;
+  }
 
   virtual double evaluate(std::vector<double>& variables) const {
     return expression.doubleFunction(child1->evaluate(variables), child2->evaluate(variables));

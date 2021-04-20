@@ -32,18 +32,18 @@ void Martist::resize(std::size_t width, std::size_t height) {
 
 void Martist::paint() {
   // DEBUG
-  std::cout << "Building new random trees. . . " << std::flush;
+  // std::cout << "Building new random trees. . . " << std::flush;
   // std::cout << "RED TREE" << std::endl;
   redTree.build();
   // std::cout << "GREEN TREE" << std::endl;
   greenTree.build();
   // std::cout << "BLUE TREE" << std::endl;
   blueTree.build();
-  std::cout << "DONE" << std::endl;
+  // std::cout << "DONE" << std::endl;
 
-  std::cout << "Creating a new piece of art. . . " << std::flush;
+  // std::cout << "Creating a new piece of art. . . " << std::flush;
   render();
-  std::cout << "DONE" << std::endl;
+  // std::cout << "DONE" << std::endl;
 }
 
 void Martist::render() const {

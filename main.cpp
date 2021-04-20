@@ -1,63 +1,16 @@
 #include "Martist.hpp"
-#include <random>
-#include <fstream>
-#include <time.h>
-
 #include <iostream>
-
-#define width 600
-#define height 600
-
-using namespace std;
-
-void makeImage(std::unique_ptr<uint8_t[]>& buffer, size_t w, size_t h) {
-  ofstream file("test_image.ppm");
-
-  file << "P6 " << w << " " << h << " 255\n";
-  for (std::size_t i = 0; i < width * height * 3; ++i)
-    file << buffer[i];
-
-  file.close();
-}
-
+#include <cassert>
 int main() {
-  size_t size = width * height * 3 * sizeof(uint8_t);
-
-  auto buffer = make_unique<uint8_t[]>(size);
-
-  Martist martist(buffer.get(), width, height, 15, 15, 15);
-
-  cout << martist.readUnitSizes() << endl;
-
-  // martist.seed(2);
-
+  constexpr std::size_t WIDTH = 320, HEIGHT = 240;
+  std::uint8_t buf[WIDTH * HEIGHT * 3];
+  for (std::size_t i = 0; i < WIDTH * HEIGHT * 3; ++i)
+    buf[i] = i % 256; // Fill buf with mostly non-zero bytes
+  Martist martist(buf, WIDTH, HEIGHT, 0, 0, 0);
   martist.paint();
-
-  cout << martist;
-
-  makeImage(buffer, width, height);
-
-
-  cout << martist.redDepth() << martist.greenDepth() << martist.blueDepth() << endl;
-
-  // getchar();
-
-  // auto buffer2 = make_unique<uint8_t[]>(size);
-
-  // martist.changeBuffer(buffer2.get(), 40, 40);
-
-  // martist.paint();
-
-  // cout << martist;
-
-  // makeImage(buffer2, 40, 40);
-
-
-  // cin >> martist;
-
-  // cout << martist;
-
-  // makeImage(buffer);
-
+  // buf should be filled black (i.e. zero-filled)
+  for (std::size_t i = 0; i < WIDTH * HEIGHT * 3; ++i) {
+    assert(buf[i] == 0);
+  }
   return 0;
 }

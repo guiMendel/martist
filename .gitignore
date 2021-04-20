@@ -1,7 +1,8 @@
 *.out
 *out.txt
 .vscode
-test*
+main*
 obj
 *.o
 martist
+s208026*
